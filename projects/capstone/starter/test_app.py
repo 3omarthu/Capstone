@@ -11,8 +11,8 @@ class CastingTestCase(unittest.TestCase):
     def setUp(self):
         self.app = create_app()
         self.client = self.app.test_client
-        self.database_path_test = os.environ['DATABASE_URL']
-        setup_db(self.app, self.database_path_test)
+        self.DATABASE_URL_TEST = os.environ['DATABASE_URL']
+        setup_db(self.app, self.DATABASE_URL_TEST)
 
         # binds the app to the current context
         with self.app.app_context():

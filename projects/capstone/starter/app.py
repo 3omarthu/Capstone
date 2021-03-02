@@ -48,11 +48,11 @@ def create_app(test_config=None):
     def delete_actor(id):
         try:
             actor = Actor.query.filter_by(id=id).one_or_none()
+            if actor is None:
+                abort(404)
         except:
             abort(500)
 
-        if actor is None:
-            abort(404)
 
         try:
             actor.delete()
@@ -69,29 +69,25 @@ def create_app(test_config=None):
     def add_actor():
         try:
             body = request.get_json()
-            name = body.get('name')
-            age = body.get('age')
-            gender = body.get('gender')
+            if not ('name' in body and 'age' in body and 'gender' in body):
+                abort(422)
+            name = body.get('name', None)
+            age = body.get('age', None)
+            gender = body.get('gender', None)
 
         except:
             abort(400)
-
-        if not name:
-            abort(400)
-        if not age:
-            abort(400)
-        if not gender:
-            abort(400)
-
+        
+        actor = Actor(name=name, age=age, gender=gender)
         try:
-            actor = Actor(name=name, age=age, gender=gender)
             actor.insert()
-            return jsonify({
+        except:
+            abort(500)
+        
+        return jsonify({
                 'seccess': True,
                 'created ': actor.id
                 })
-        except:
-            abort(500)
 
 
     @app.route('/actors/<int:id>', methods=['PATCH'])
@@ -129,14 +125,16 @@ def create_app(test_config=None):
     @requires_auth('get:movie')
     def get_Movies():
         try:
+            data = []
             movies = Movie.query.all()
             if movies is None:
                 abort(404)
-            formatted_Movies = [Movie.format() for Movie in movies]
-            return jsonify({
-                'seccess': True,
-                'actors': formatted_Movies
-                })
+            for movie in movies:
+                data.append({
+                "title": movie.title,
+                "release date": movie.release_date
+            })
+            return json.dumps(data)
         except:
             abort(500)
 
@@ -146,11 +144,10 @@ def create_app(test_config=None):
     def delete_movie(id):
         try:
             movie = Movie.query.filter_by(id=id).one_or_none()
+            if movie is None:
+                abort(404)
         except:
             abort(500)
-
-        if movie is None:
-            abort(404)
 
         try:
             movie.delete()

@@ -24,14 +24,16 @@ def get_token_auth_header():
                             "description": "Authorization header is expected"}, 401)
     header_parts = auth_header.split()
 
-    if len(header_parts) != 2:
+    if header_parts[0].lower() != "bearer":
         raise AuthError({"code": "invalid_header",
-                        "description": "Authorization header is malformed"},
-                        401)
-    elif header_parts[0].lower() != 'bearer':
+                        "description": "Authorization header must start with" " Bearer"}, 401)
+    elif len(header_parts) == 1:
         raise AuthError({"code": "invalid_header",
-                        "description": "Authorization header must start with" " Bearer"},
-                        401)
+                        "description": "Token not found"}, 401)
+    elif len(header_parts) > 2:
+        raise AuthError({"code": "invalid_header",
+                        "description":
+                        "Authorization header must be" " Bearer token"}, 401)
     return header_parts[1]
 
 
@@ -108,12 +110,10 @@ def requires_auth(permission=''):
     def requires_auth_decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
-            try:
-                token = get_token_auth_header()
-                payload = verify_decode_jwt(token)
-                check_permissions(permission, payload)
-                return f(payload, *args, **kwargs)
-            except:
-                abort(401)
+            token = get_token_auth_header()
+            payload = verify_decode_jwt(token)
+            check_permissions(permission, payload)
+            return f(payload, *args, **kwargs)
+        
         return wrapper
     return requires_auth_decorator    

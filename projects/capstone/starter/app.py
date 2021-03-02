@@ -183,7 +183,7 @@ def create_app(test_config=None):
             movie.insert()
             return jsonify({
                 'seccess': True,
-                'created ': movie.id
+                'created ': id
                 })
         except:
             abort(500)

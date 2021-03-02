@@ -18,14 +18,10 @@ class AuthError(Exception):
 
 
 def get_token_auth_header():
-    if 'Authorization' not in request.headers:
-        abort(401)
-
-    auth_header = request.headers['Authorization']
+    auth_header = request.headers.get("Authorization", None)
     if not auth_header:
         raise AuthError({"code": "authorization_header_missing",
-                        "description": "Authorization header is expected"},
-                        401)
+                            "description": "Authorization header is expected"}, 401)
     header_parts = auth_header.split()
 
     if len(header_parts) != 2:

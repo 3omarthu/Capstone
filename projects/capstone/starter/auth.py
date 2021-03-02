@@ -21,7 +21,7 @@ def get_token_auth_header():
     auth_header = request.headers.get("Authorization", None)
     if not auth_header:
         raise AuthError({"code": "authorization_header_missing",
-                            "description": "Authorization header is expected"}, 401)
+                        "description": "Authorization header is expected"}, 401)
     header_parts = auth_header.split()
 
     if header_parts[0].lower() != "bearer":
@@ -39,7 +39,7 @@ def get_token_auth_header():
 
 
 def check_permissions(permission, payload):
-    if 'permissions' not in payload: 
+    if 'permissions' not in payload:
         raise AuthError({
             'code': 'invalid_claims',
             'description': 'Permissions not included in JWT.'
@@ -115,6 +115,6 @@ def requires_auth(permission=''):
             payload = verify_decode_jwt(token)
             check_permissions(permission, payload)
             return f(payload, *args, **kwargs)
-        
+
         return wrapper
-    return requires_auth_decorator    
+    return requires_auth_decorator

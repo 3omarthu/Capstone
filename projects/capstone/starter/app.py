@@ -8,7 +8,7 @@ import json
 
 
 def create_app(test_config=None):
-  # create and configure the app
+    # create and configure the app
     app = Flask(__name__)
     setup_db(app)
     CORS(app)
@@ -23,9 +23,7 @@ def create_app(test_config=None):
                              'GET, POST, PATCH, DELETE, OPTIONS')
         return response
 
-
     #actors section
-
 
     @app.route('/actors', methods=['GET'])
     @requires_auth('get:actor')
@@ -35,7 +33,7 @@ def create_app(test_config=None):
         actors = Actor.query.all()
         if not actors:
             abort(404)
-        
+
         for actor in actors:
             data.append({
                 "name": actor.name,
@@ -44,7 +42,6 @@ def create_app(test_config=None):
             })
 
         return json.dumps(data)
-
 
     @app.route('/actors/<int:id>', methods=['DELETE'])
     @requires_auth('delete:actor')
@@ -57,35 +54,33 @@ def create_app(test_config=None):
             actor.delete()
         except:
             abort(500)
-        
+
         return jsonify({
                 'seccess': True,
                 'deleted': id
                 })
 
-
     @app.route('/actors', methods=['POST'])
     @requires_auth('post:actor')
     def add_actor(token):
-        
+
         body = request.get_json()
         if not ('name' in body and 'age' in body and 'gender' in body):
             abort(422)
         name = body.get('name', None)
         age = body.get('age', None)
         gender = body.get('gender', None)
-        
+
         actor = Actor(name=name, age=age, gender=gender)
         try:
             Actor.insert(actor)
         except:
             abort(500)
-        
+
         return jsonify({
                 'seccess': True,
                 'created ': actor.id
                 })
-
 
     @app.route('/actors/<int:id>', methods=['PATCH'])
     @requires_auth('patch:actor')
@@ -96,7 +91,7 @@ def create_app(test_config=None):
         name = data.get('name', None)
         age = data.get('age', None)
         gender = data.get('gender', None)
-        
+
         actor = Actor.query.filter_by(id=id).one_or_none()
         if actor is None:
             abort(404)
@@ -114,9 +109,7 @@ def create_app(test_config=None):
             'updated': id
         })
 
-
-    #movies section
-
+    ##movies section
 
     @app.route('/movies', methods=['GET'])
     @requires_auth('get:movie')
@@ -135,7 +128,6 @@ def create_app(test_config=None):
 
         return json.dumps(data)
 
-
     @app.route('/movies/<int:id>', methods=['DELETE'])
     @requires_auth('delete:movie')
     def delete_movie(token, id):
@@ -152,14 +144,13 @@ def create_app(test_config=None):
                 'deleted': id
                 })
 
-
     @app.route('/movies', methods=['POST'])
     @requires_auth('post:movie')
     def add_movie(token):
         body = request.get_json()
         if not ('title' in body and 'release_date' in body):
             abort(422)
-            
+
         title = body.get('title', None)
         release_date = body.get('release_date', None)
         movie = Movie(title=title, release_date=release_date)
@@ -171,8 +162,6 @@ def create_app(test_config=None):
                 })
         except:
             abort(500)
-
-
 
     @app.route('/movies/<int:id>', methods=['PATCH'])
     @requires_auth('patch:movie')
@@ -189,7 +178,7 @@ def create_app(test_config=None):
 
         if title is not None:
             movie.title = title
-        
+
         if release_date is not None:
             movie.release_date = release_date
 
@@ -202,7 +191,6 @@ def create_app(test_config=None):
 
     #Error Handlers
 
-
     @app.errorhandler(400)
     def bad_request(error):
         return jsonify({
@@ -210,7 +198,6 @@ def create_app(test_config=None):
             "error": 400,
             "message": "Bad Request"
         }), 400
-
 
     @app.errorhandler(404)
     def not_found(error):
@@ -220,7 +207,6 @@ def create_app(test_config=None):
             "message": "Not found"
         }), 404
 
-
     @app.errorhandler(422)
     def unprocessabley(error):
         return jsonify({
@@ -228,7 +214,6 @@ def create_app(test_config=None):
             "error": 422,
             "message": "Unprocessable"
         }), 422
-
 
     @app.errorhandler(500)
     def internal_server_error(error):
@@ -238,7 +223,6 @@ def create_app(test_config=None):
             "message": "Internal Server Error"
         }), 500
 
-
     @app.errorhandler(401)
     def Unauthorized(error):
         return jsonify({
@@ -246,7 +230,6 @@ def create_app(test_config=None):
             "error": 401,
             "message": "Unauthorized"
         }), 401
-
 
     @app.errorhandler(AuthError)
     def handle_auth_error(ex):

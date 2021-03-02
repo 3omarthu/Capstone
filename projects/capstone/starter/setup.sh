@@ -4,4 +4,4 @@ AUTH0_CLIENT_SECRET = '4rROHEaS9QdvJAZTldl-WJtT0vlONGCn3NEmOgvXLsMpW13NpYNd5hDMW
 ALGORITHMS = ['RS256']
 API_AUDIENCE = 'http://localhost:8080'
 database_path = "postgres://yavgsgiwsnjpis:48db92f09a67d31af2e83b1c152aca0eeb024f34a9c051596fb0e6c540d57f6a@ec2-3-232-163-23.compute-1.amazonaws.com:5432/daif2ne8fscvc9"
-database_path_test = ""
+database_path_test = "postgres://czarvlytlmabpt:846397751e879015af7d767fcb99db3853553957ca7c6c023fbb2a2099478513@ec2-54-166-242-77.compute-1.amazonaws.com:5432/d6rtl5pv432vq0"

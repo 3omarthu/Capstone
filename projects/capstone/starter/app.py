@@ -27,60 +27,57 @@ def create_app(test_config=None):
     #actors section
 
 
-    @app.route('/actors ', methods=['GET'])
+    @app.route('/actors', methods=['GET'])
     @requires_auth('get:actor')
-    def get_actors():
-        try:
-            actors = Actor.query.all()
-            if actors is None:
-                abort(404)
-            formatted_Actors = [Actor.format() for Actor in actors]
-            return jsonify({
-                'seccess': True,
-                'actors': formatted_Actors
-                })
-        except:
-            abort(500)
+    def get_actors(token):
+        data = []
+
+        actors = Actor.query.all()
+        if not actors:
+            abort(404)
+        
+        for actor in actors:
+            data.append({
+                "name": actor.name,
+                "age": actor.age,
+                "gender": actor.gender
+            })
+
+        return json.dumps(data)
 
 
     @app.route('/actors/<int:id>', methods=['DELETE'])
     @requires_auth('delete:actor')
-    def delete_actor(id):
-        try:
-            actor = Actor.query.filter_by(id=id).one_or_none()
-            if actor is None:
-                abort(404)
-        except:
-            abort(500)
+    def delete_actor(token, id):
 
-
+        actor = Actor.query.filter_by(id=id).one_or_none()
+        if actor is None:
+            abort(404)
         try:
             actor.delete()
-            return jsonify({
+        except:
+            abort(500)
+        
+        return jsonify({
                 'seccess': True,
                 'deleted': id
                 })
-        except:
-            abort(500)
 
 
     @app.route('/actors', methods=['POST'])
     @requires_auth('post:actor')
-    def add_actor():
-        try:
-            body = request.get_json()
-            if not ('name' in body and 'age' in body and 'gender' in body):
-                abort(422)
-            name = body.get('name', None)
-            age = body.get('age', None)
-            gender = body.get('gender', None)
-
-        except:
-            abort(400)
+    def add_actor(token):
+        
+        body = request.get_json()
+        if not ('name' in body and 'age' in body and 'gender' in body):
+            abort(422)
+        name = body.get('name', None)
+        age = body.get('age', None)
+        gender = body.get('gender', None)
         
         actor = Actor(name=name, age=age, gender=gender)
         try:
-            actor.insert()
+            Actor.insert(actor)
         except:
             abort(500)
         
@@ -121,91 +118,83 @@ def create_app(test_config=None):
     #movies section
 
 
-    @app.route('/movies ', methods=['GET'])
+    @app.route('/movies', methods=['GET'])
     @requires_auth('get:movie')
-    def get_Movies():
-        try:
-            data = []
-            movies = Movie.query.all()
-            if movies is None:
-                abort(404)
-            for movie in movies:
-                data.append({
+    def get_Movies(token):
+        data = []
+
+        movies = Movie.query.all()
+
+        if movies is None:
+            abort(404)
+        for movie in movies:
+            data.append({
                 "title": movie.title,
                 "release date": movie.release_date
             })
-            return json.dumps(data)
-        except:
-            abort(500)
+
+        return json.dumps(data)
 
 
     @app.route('/movies/<int:id>', methods=['DELETE'])
     @requires_auth('delete:movie')
-    def delete_movie(id):
-        try:
-            movie = Movie.query.filter_by(id=id).one_or_none()
-            if movie is None:
-                abort(404)
-        except:
-            abort(500)
+    def delete_movie(token, id):
+        movie = Movie.query.filter_by(id=id).one_or_none()
+        if movie is None:
+            abort(404)
 
         try:
             movie.delete()
-            return jsonify({
+        except:
+            abort(500)
+        return jsonify({
                 'seccess': True,
                 'deleted': id
                 })
-        except:
-            abort(500)
 
 
     @app.route('/movies', methods=['POST'])
     @requires_auth('post:movie')
-    def add_movie():
+    def add_movie(token):
+        body = request.get_json()
+        if not ('title' in body and 'release_date' in body):
+            abort(422)
+            
+        title = body.get('title', None)
+        release_date = body.get('release_date', None)
+        movie = Movie(title=title, release_date=release_date)
         try:
-            body = request.get_json()
-            title = body.get('title')
-            release_date = body.get('release_date')
-
-        except:
-            abort(400)
-
-        if not title:
-            abort(400)
-        if not release_date:
-            abort(400)
-
-        try:
-            movie = Movie(title=title, release_date=release_date)
             movie.insert()
             return jsonify({
                 'seccess': True,
-                'created ': id
+                'created': movie.id
                 })
         except:
             abort(500)
+
 
 
     @app.route('/movies/<int:id>', methods=['PATCH'])
     @requires_auth('patch:movie')
     def edit_movie(token, id):
-        data = request.get_json()
-        if not ('title' in data or 'release_date'):
-            abort(422)
-
-        title = data.get('title', None)
-        release_date = data.get('release_date', None)
-
         movie = Movie.query.filter_by(id=id).one_or_none()
         if movie is None:
             abort(404)
+        body = request.get_json()
+        if not ('title' in body or 'release_date' in body):
+            abort(422)
+
+        title = body.get('title', None)
+        release_date = body.get('release_date', None)
 
         if title is not None:
             movie.title = title
+        
         if release_date is not None:
-            movie.age = release_date
+            movie.release_date = release_date
 
         movie.update()
+
         return jsonify({
             'success': "true",
             'updated': id

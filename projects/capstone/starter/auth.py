@@ -34,7 +34,8 @@ def get_token_auth_header():
         raise AuthError({"code": "invalid_header",
                         "description":
                         "Authorization header must be" " Bearer token"}, 401)
-    return header_parts[1]
+    token = header_parts[1]
+    return token
 
 
 def check_permissions(permission, payload):
